@@ -2,8 +2,8 @@ services:
   db:
     image: mysql:8.0.33
     environment:
-      MYSQL_USER: tsuka
       MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: ai_chat_dev
     ports:
       - "3306:3306"
     volumes:
@@ -12,7 +12,10 @@ services:
 
 
   web:
-    build: .
+    build: .  
+    networks:
+      app_net:
+        ipv4_address: "172.23.0.3"
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     volumes:
       - .:/myapp
@@ -23,7 +26,16 @@ services:
       - db
     tty: true
     stdin_open: true
+    environment:
+      RAILS_ENV: "development"
 
 volumes:
   gem_data:
   chat-gpt-db:
+networks: 
+  app_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+       - subnet: "172.23.0.0/16"
